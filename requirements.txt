@@ -15,7 +15,7 @@ chroma-hnswlib==0.7.3
 chromadb==0.4.24
 click==8.1.8
 coloredlogs==15.0.1
-cryptography==49.0.0
+cryptography
 cssselect2==0.8.0
 distro==1.9.0
 durationpy==0.10
