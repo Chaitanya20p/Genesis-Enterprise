@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Genesis AI — Enterprise Multi-Agent Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="/static/style.css" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="g-header">
+  <div class="g-logo">
+    <div class="g-logo-mark">G</div>
+    <span class="g-logo-text">Genesis<span>AI</span></span>
+    <span class="g-badge">Enterprise</span>
+  </div>
+  <div class="g-status">
+    <div class="g-status-pill d-none d-md-flex">
+      <span class="g-status-dot live" id="status-dot"></span>
+      <span id="status-label">Ready</span>
+    </div>
+    <div class="g-status-pill d-none d-lg-flex">
+      <span style="color:#e53935;font-size:11px;">●</span>
+      <span>IBM Watsonx.ai · Granite</span>
+    </div>
+    <div class="g-status-pill d-none d-lg-flex">
+      <span style="color:#666;font-size:11px;">●</span>
+      <span>ChromaDB RAG</span>
+    </div>
+  </div>
+</header>
+
+<!-- INPUT -->
+<section class="g-input-section">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="g-label">Project Title</label>
+      <input type="text" id="project-title" class="g-input form-control"
+        placeholder="e.g. Smart City AI Platform" maxlength="120"/>
+    </div>
+    <div class="col-md-6">
+      <label class="g-label">Problem Statement</label>
+      <textarea id="problem-statement" class="g-input form-control" rows="2" maxlength="4000"
+        placeholder="Describe your enterprise innovation challenge in detail…"></textarea>
+      <div class="d-flex justify-content-between mt-1">
+        <span style="font-size:10px;color:var(--white-4);">Agents will analyse, debate, and propose 3 solutions</span>
+        <span id="char-counter" style="font-size:10px;color:var(--white-4);">0 / 4000</span>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <button id="btn-deploy" class="g-btn w-100" onclick="deployAgents()">
+        <span id="btn-text">⚡ Deploy Genesis Agents</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- TABS -->
+<div class="g-tabs-bar">
+  <button class="g-tab active" data-tab="graph"     onclick="switchTab('graph',this)">Agent Workflow</button>
+  <button class="g-tab"        data-tab="debate"    onclick="switchTab('debate',this)">AI Debate Room <span id="debate-badge" style="display:none;color:var(--red);margin-left:4px;font-size:9px;">●</span></button>
+  <button class="g-tab"        data-tab="analytics" onclick="switchTab('analytics',this)">Solution Analytics</button>
+  <button class="g-tab"        data-tab="rag"       onclick="switchTab('rag',this)">RAG & Export</button>
+</div>
+
+<!-- CONTENT -->
+<div class="g-content">
+
+  <!-- ======================================================
+       TAB: AGENT WORKFLOW
+       ====================================================== -->
+  <div id="tab-graph" class="tab-pane active">
+    <div class="row g-3">
+
+      <!-- Pipeline strip -->
+      <div class="col-12">
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Agent Execution Pipeline</span>
+            <span id="pipeline-status" style="font-size:10px;color:var(--white-4);">Awaiting deployment</span>
+          </div>
+          <div class="g-pipeline" id="agent-pipeline">
+            <div class="g-stage"><div class="g-stage-icon" id="icon-user">👤</div><span class="g-stage-label">User</span></div>
+            <div class="g-connector" id="conn-1"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-rag">📚</div><span class="g-stage-label">RAG</span></div>
+            <div class="g-connector" id="conn-2"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-planner">🧠</div><span class="g-stage-label">Planner</span></div>
+            <div class="g-connector" id="conn-3"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-architect">🏗️</div><span class="g-stage-label">Architect</span></div>
+            <div class="g-connector" id="conn-4"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-business">💼</div><span class="g-stage-label">Business</span></div>
+            <div class="g-connector" id="conn-5"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-critic">⚖️</div><span class="g-stage-label">Critics</span></div>
+            <div class="g-connector" id="conn-6"></div>
+            <div class="g-stage"><div class="g-stage-icon" id="icon-output">✅</div><span class="g-stage-label">Output</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph + RAG context -->
+      <div class="col-lg-8">
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Knowledge Graph — Agent Data Flow</span>
+            <div class="d-flex gap-2">
+              <button class="g-btn-ghost" onclick="if(STATE.network)STATE.network.fit()">Fit</button>
+              <button class="g-btn-ghost" onclick="initKnowledgeGraph()">Reset</button>
+            </div>
+          </div>
+          <div id="network-graph"></div>
+          <div class="g-graph-legend">
+            <div class="g-legend-item"><div class="g-legend-dot" style="background:#e53935;"></div>Orchestrator</div>
+            <div class="g-legend-item"><div class="g-legend-dot" style="background:#ffffff;"></div>Agent</div>
+            <div class="g-legend-item"><div class="g-legend-dot" style="background:#666666;"></div>Store</div>
+            <div class="g-legend-item"><div class="g-legend-dot" style="background:#b0b0b0;"></div>Output</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAG context snippets -->
+      <div class="col-lg-4">
+        <div class="g-card h-100" style="display:flex;flex-direction:column;">
+          <div class="g-card-head">
+            <span class="g-card-title">RAG Context Retrieved</span>
+            <span id="rag-passage-count" style="font-size:10px;color:var(--white-4);">0 passages</span>
+          </div>
+          <div class="g-card-body" style="overflow-y:auto;flex:1;" id="rag-context-panel">
+            <div class="g-empty">
+              <div class="g-empty-icon">🔍</div>
+              <div class="g-empty-text">Upload PDFs in the RAG tab to enrich agent context</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       TAB: AI DEBATE ROOM
+       ====================================================== -->
+  <div id="tab-debate" class="tab-pane" style="display:none;">
+    <div class="row g-3">
+
+      <!-- Chat window -->
+      <div class="col-lg-8">
+        <div class="g-card" style="display:flex;flex-direction:column;">
+          <div class="g-card-head">
+            <span class="g-card-title">AI Self-Critic Debate — Live Transcript</span>
+            <div class="d-flex gap-2">
+              <span class="g-score-tag">Security: <b id="score-innovation" class="c-red">—</b>/10</span>
+              <span class="g-score-tag">Finance: <b id="score-cost" class="c-green">—</b>/10</span>
+            </div>
+          </div>
+          <div class="g-debate-window" id="debate-chat">
+            <div class="g-empty">
+              <div class="g-empty-icon">⚔️</div>
+              <div class="g-empty-text">Deploy agents to watch Security, Finance &amp; Architect debate in real time</div>
+            </div>
+          </div>
+          <div class="g-debate-footer">
+            <span class="g-round-tag" id="debate-round">Round 0</span>
+            <span id="debate-status" style="font-size:11px;color:var(--white-4);">Waiting for deployment…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent roster + stats -->
+      <div class="col-lg-4 d-flex flex-column gap-3">
+
+        <div class="g-card">
+          <div class="g-card-head"><span class="g-card-title">Agent Roster</span></div>
+          <div class="g-card-body d-flex flex-column gap-3">
+            <div class="d-flex align-items-start gap-3">
+              <div class="g-msg-avatar" style="border-color:var(--white-3);">🏗️</div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--white-2);">Architect</div>
+                <div style="font-size:11px;color:var(--white-4);">Proposes architecture · revises on critique</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="g-msg-avatar" style="border-color:var(--red);">🛡️</div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--red);">Security Agent</div>
+                <div style="font-size:11px;color:var(--white-4);">Scores innovation &amp; security — threshold ≥7</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="g-msg-avatar" style="border-color:#22c55e;">💹</div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#22c55e;">Finance Agent</div>
+                <div style="font-size:11px;color:var(--white-4);">Scores cost efficiency — threshold ≥6</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="g-msg-avatar" style="border-color:var(--white-5);">⚖️</div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--white-3);">Moderator</div>
+                <div style="font-size:11px;color:var(--white-4);">Declares consensus · max 3 rounds</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-head"><span class="g-card-title">Debate Statistics</span></div>
+          <div class="g-card-body">
+            <div class="g-metric-grid">
+              <div class="g-metric"><div class="g-metric-val c-white" id="stat-turns">0</div><div class="g-metric-lbl">Turns</div></div>
+              <div class="g-metric"><div class="g-metric-val c-red"   id="stat-rounds">0</div><div class="g-metric-lbl">Rounds</div></div>
+              <div class="g-metric"><div class="g-metric-val c-green" id="stat-consensus">—</div><div class="g-metric-lbl">Consensus</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       TAB: SOLUTION ANALYTICS
+       ====================================================== -->
+  <div id="tab-analytics" class="tab-pane" style="display:none;">
+    <div class="row g-3">
+
+      <!-- Radar chart -->
+      <div class="col-lg-4">
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Innovation Radar</span>
+            <span style="font-size:10px;color:var(--white-4);">A · B · C</span>
+          </div>
+          <div class="g-card-body">
+            <div class="g-radar-wrap">
+              <canvas id="radar-chart"></canvas>
+            </div>
+            <div id="radar-empty" class="g-empty mt-2" style="padding:16px;">
+              <div class="g-empty-text">Run agents to populate radar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solution cards -->
+      <div class="col-lg-8">
+        <div class="row g-3" id="sol-cards-row">
+          <div class="col-12" id="sol-empty">
+            <div class="g-empty" style="padding:60px 20px;">
+              <div class="g-empty-icon">🚀</div>
+              <div class="g-empty-text">Three solution variants will appear here after deployment</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- What-If -->
+      <div class="col-12">
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">What-If Analysis Simulator</span>
+            <span style="font-size:10px;color:var(--white-4);">Live UI recalculation</span>
+          </div>
+          <div class="g-card-body">
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="g-whatif">
+                  <label class="g-label">Budget Cut</label>
+                  <input type="range" class="g-slider" id="sl-budget" min="0" max="75" value="0" oninput="recalcWhatIf()"/>
+                  <div class="d-flex justify-content-between">
+                    <span style="font-size:10px;color:var(--white-4);">0%</span>
+                    <span style="font-size:10px;color:var(--red);" id="lbl-budget">Cut 0%</span>
+                    <span style="font-size:10px;color:var(--white-4);">75%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="g-whatif">
+                  <label class="g-label">Team Scale</label>
+                  <input type="range" class="g-slider" id="sl-team" min="1" max="10" value="5" oninput="recalcWhatIf()"/>
+                  <div class="d-flex justify-content-between">
+                    <span style="font-size:10px;color:var(--white-4);">1×</span>
+                    <span style="font-size:10px;color:var(--white-3);" id="lbl-team">5× Team</span>
+                    <span style="font-size:10px;color:var(--white-4);">10×</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="g-whatif">
+                  <label class="g-label">Timeline</label>
+                  <input type="range" class="g-slider" id="sl-timeline" min="3" max="36" value="18" oninput="recalcWhatIf()"/>
+                  <div class="d-flex justify-content-between">
+                    <span style="font-size:10px;color:var(--white-4);">3mo</span>
+                    <span style="font-size:10px;color:var(--white-3);" id="lbl-timeline">18 months</span>
+                    <span style="font-size:10px;color:var(--white-4);">36mo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="g-metric-grid" style="margin-top:16px;grid-template-columns:repeat(6,1fr);">
+              <div class="g-metric"><div class="g-metric-val" id="wi-budget">$80k</div><div class="g-metric-lbl">Budget</div></div>
+              <div class="g-metric"><div class="g-metric-val" id="wi-team">5 Eng</div><div class="g-metric-lbl">Team</div></div>
+              <div class="g-metric"><div class="g-metric-val" id="wi-roi">18mo</div><div class="g-metric-lbl">ROI</div></div>
+              <div class="g-metric"><div class="g-metric-val" id="wi-feasibility">7/10</div><div class="g-metric-lbl">Feasibility</div></div>
+              <div class="g-metric"><div class="g-metric-val" id="wi-risk">Med</div><div class="g-metric-lbl">Risk</div></div>
+              <div class="g-metric"><div class="g-metric-val" id="wi-velocity">1.0×</div><div class="g-metric-lbl">Velocity</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       TAB: RAG & EXPORT
+       ====================================================== -->
+  <div id="tab-rag" class="tab-pane" style="display:none;">
+    <div class="row g-3">
+
+      <!-- Upload + search -->
+      <div class="col-lg-5 d-flex flex-column gap-3">
+
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Knowledge Base — PDF Upload</span>
+            <span id="kb-count" style="font-size:10px;color:#22c55e;">0 docs</span>
+          </div>
+          <div class="g-card-body">
+            <div class="g-dropzone" id="drop-zone"
+              ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+              ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+              <div class="g-dropzone-icon">📄</div>
+              <div class="g-dropzone-text"><b>Click to browse</b> or drag &amp; drop PDF files<br/>
+                <span style="font-size:10px;">PDF only · max 16 MB</span></div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf" multiple style="display:none;"
+              onchange="handleFileSelect(event)"/>
+
+            <div id="upload-area" class="mt-3" style="display:none;">
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:11px;color:var(--white-4);" id="upload-fname">Uploading…</span>
+                <span style="font-size:11px;color:var(--red);" id="upload-pct">0%</span>
+              </div>
+              <div style="background:var(--black-5);border-radius:2px;height:3px;">
+                <div id="upload-bar" style="height:100%;width:0%;background:var(--red);transition:width 0.3s;border-radius:2px;"></div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <div class="g-label mb-2">Indexed Documents</div>
+              <div id="indexed-docs"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-head"><span class="g-card-title">Semantic Search</span></div>
+          <div class="g-card-body">
+            <div class="d-flex gap-2">
+              <input type="text" id="rag-query" class="g-input form-control" placeholder="Search indexed documents…"/>
+              <button class="g-btn" style="padding:9px 16px;white-space:nowrap;" onclick="runSearch()">Search</button>
+            </div>
+            <div class="mt-3" id="search-results">
+              <div style="font-size:11px;color:var(--white-4);">Results will appear here.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Export + tools -->
+      <div class="col-lg-7 d-flex flex-column gap-3">
+
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Report Export</span>
+            <span id="export-project-info" style="font-size:10px;color:var(--white-4);">No project loaded</span>
+          </div>
+          <div class="g-card-body">
+            <p style="font-size:12px;color:var(--white-4);margin-bottom:16px;">
+              Generate a professional multi-section PDF including all three solution architectures,
+              business model canvases, debate transcript, and innovation scores.
+            </p>
+            <button class="g-export-btn primary" onclick="exportPDF()">
+              <span>📄</span><span>Generate PDF Report</span>
+            </button>
+            <button class="g-export-btn" onclick="exportJSON()">
+              <span>📦</span><span>Export Raw JSON</span>
+            </button>
+            <button class="g-export-btn" onclick="copyShareLink()">
+              <span>🔗</span><span>Copy API Link</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-head"><span class="g-card-title">Patent Novelty Checker</span></div>
+          <div class="g-card-body">
+            <div class="d-flex gap-2">
+              <textarea id="patent-input" class="g-input form-control" rows="3"
+                placeholder="Paste a patent claim to check novelty against indexed documents…"></textarea>
+              <button class="g-btn" style="padding:9px 14px;align-self:flex-end;white-space:nowrap;" onclick="checkNovelty()">Check</button>
+            </div>
+            <div class="mt-3" id="novelty-result"></div>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-head">
+            <span class="g-card-title">Project History</span>
+            <button class="g-btn-ghost" onclick="loadHistory()">Refresh</button>
+          </div>
+          <div style="max-height:240px;overflow-y:auto;" id="history-list">
+            <div class="g-card-body" style="color:var(--white-4);font-size:12px;">No projects yet.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /g-content -->
+
+<!-- TOASTS -->
+<div class="g-toasts" id="toasts"></div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="/static/script.js"></script>
+
+</body>
+</html>

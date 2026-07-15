@@ -1,0 +1,34 @@
+# Genesis AI — Python Dependencies
+# Compatible with Python 3.9+
+# Install with: .venv/bin/pip install -r requirements.txt
+
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-CORS==4.0.1
+python-dotenv==1.0.1
+
+# IBM Watsonx.ai SDK — use ibm-watson-machine-learning on Python 3.9
+# On Python >=3.10 you can swap this for: ibm-watsonx-ai>=1.1.2
+ibm-watsonx-ai==0.0.5
+
+# ChromaDB — last version compatible with Python 3.9
+chromadb==0.4.24
+
+# PDF report export (requires wkhtmltopdf binary — see .env.example)
+pdfkit==1.0.0
+
+# Core web stack
+Werkzeug==3.0.3
+SQLAlchemy==2.0.31
+gunicorn==22.0.0
+Pillow==10.4.0
+
+# NumPy pinned to 1.x — chromadb==0.4.24 C extensions require numpy ABI < 2.0
+numpy==1.26.4
+
+# Sentence Transformers — required by ChromaDB's default embedding function
+sentence-transformers
+
+# urllib3 pinned to 1.x — ibm-watson-machine-learning uses DEFAULT_CIPHERS
+# removed in urllib3 v2
+urllib3==1.26.20
